@@ -5,11 +5,23 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:vBlockSearcher"
         mc:Ignorable="d"
-        Title="vBlock Searcher" Height="350" Width="525">
+        Title="vBlock Searcher" HorizontalAlignment="Left" Height="436.111" VerticalAlignment="Top" Width="693.556">
+    
     <Grid>
-        <TextBox x:Name="inputBox" HorizontalAlignment="Left" Height="23" Margin="31,26,0,0" TextWrapping="Wrap" Text="Enter Machine Name" 
-                 VerticalAlignment="Top" Width="452" HorizontalContentAlignment="Center" GotFocus="inputBox_GotFocus"/>
-        <DataGrid HorizontalAlignment="Left" Height="208" Margin="31,65,0,0" VerticalAlignment="Top" Width="452"/>
+        <TextBox x:Name="inputBox" HorizontalAlignment="Left" Height="23" Margin="31,26,0,0" TextWrapping="Wrap" Text="{Binding FilterText, UpdateSourceTrigger=PropertyChanged}"
+            VerticalAlignment="Top" Width="452" HorizontalContentAlignment="Center" SpellCheck.IsEnabled="True"/>
 
+        <DataGrid Name="csvGrid" AutoGenerateColumns="False" ItemsSource="{Binding machineCollection}" HorizontalAlignment="Left" Margin="31,103,0,0" VerticalAlignment="Top" IsReadOnly="True">
+            <DataGrid.Columns>
+               
+                    <DataGridTextColumn Header="MachineName" Binding="{Binding machineName}"/>
+                    <DataGridTextColumn Header="vBlock" Binding="{Binding vBlock}"/>
+                    <DataGridHyperlinkColumn Header="URL" Binding="{Binding URL}"/>
+                    <DataGridTextColumn Header="Folder" Binding="{Binding folder}"/>
+                    <DataGridTextColumn Header="Sub-Folder" Binding="{Binding subFolder}"/>
+                
+            </DataGrid.Columns>
+        </DataGrid>
+       
     </Grid>
 </Window>

@@ -1,88 +1,129 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System.Collections.ObjectModel;
+using System.ComponentModel;
+using System.IO;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
-using System.IO;
-using System.Data;
+
+
 
 namespace vBlockSearcher
 {
     /// <summary>
     /// Interaction logic for MainWindow.xaml
+    /// filtering logic: http://dotnetpattern.com/filter-listview-wpf
     /// </summary>
-   
-    public partial class MainWindow : Window
+
+    public partial class MainWindow : INotifyPropertyChanged
     {
-        public MainWindow()
+
+       // private string filterText; 
+       // private CollectionViewSource machineCollection;
+        public event PropertyChangedEventHandler PropertyChanged;
+        
+
+
+        public MainWindow() 
         {
             InitializeComponent();
-        }
 
-        private void inputBox_GotFocus(object sender, RoutedEventArgs e)
-        {
-            TextBox inputBox = (TextBox)sender;
-            inputBox.Text = string.Empty;
-            inputBox.GotFocus -= inputBox_GotFocus;
-        }
+            ObservableCollection<vBlockData> vBlockDataCollection = new ObservableCollection<vBlockData>();
 
-        //https://www.youtube.com/watch?v=3YBTVn1a4oM for reading from csv
-        void readCSV()
-        {
-            string path = @"C:\Users\achapman\Desktop\vBlock.csv";
-            StreamReader SR = new StreamReader(path);
-            DataTable dt = new DataTable();
-
-            int rows = 0; // placeholder to initiate column headers on first read
-
-            string[] columnNames = null;
+#region
+            //add to view model in constructor for vBlockDataCollection??--
+            StreamReader SR = new StreamReader(getFilePath());
             string[] streamValuesArray = null;
 
             while (!SR.EndOfStream)
             {
-                string streamInput = SR.ReadLine().Trim(); 
+                string streamInput = SR.ReadLine().Trim();
 
-                if(streamInput.Length > 0) 
+                if (streamInput.Length > 0)
                 {
                     streamValuesArray = streamInput.Split(',');
-                    if (rows == 0) //creates headers for columns
-                    {
-                        rows = 1; //turns off flag for column headers
-                        columnNames = streamValuesArray; 
-                        foreach(string headers in columnNames)
-                        {
-                            DataColumn DC = new DataColumn(headers, typeof(string));
-                            DC.DefaultValue = string.Empty;
-                            dt.Columns.Add(DC);
-                        }
-                    }
-                    else
-                    {
-                        DataRow DR = dt.NewRow();
 
-                        for (int i = 0; i < columnNames.Length; i++)
-                        {
-                            DR[columnNames[i]] = streamValuesArray[i] == null ? string.Empty : streamValuesArray[i];
-                            //DR[columnNames[i]] = (streamValuesArray[i] == null ? string.Empty : streamValuesArray[i];)
-                            //Think of the ternary operator in these paranthesis. If sva[i] = null, then DR[columnNames[i] = string.empty 
-                            //ELSE DR[columnNames[i] = sva[i] 
-                   
-
-                        }
-                    }
+                    vBlockDataCollection.Add(new vBlockData
+                    {
+                        machineName = streamValuesArray[0],
+                        vBlock = streamValuesArray[1],
+                        URL = new Uri(streamValuesArray[2]),
+                        folder = streamValuesArray[3],
+                        subFolder = streamValuesArray[4]
+                    });
                 }
-                
+            }
+            SR.Close();
+            SR.Dispose();
+#endregion
+            csvGrid.ItemsSource = vBlockDataCollection;
+
+            //machineCollection = new CollectionViewSource();
+            //machineCollection.Source = vBlockDataCollection;
+            //machineCollection.Filter += machineCollection_Filter;
+
+           
+            
+
+        }
+
+        public ICollectionView SourceCollection
+        {
+            get
+            {
+                return CollectionViewSource.GetDefaultView()
             }
         }
-    }
 
+        public string getFilePath()
+        {
+            return vBlockData.Path;
+        }
+
+
+        //public string FilterText
+        //{
+        //    get
+        //    {
+        //        return filterText;
+        //    }
+        //    set
+        //    {
+        //        filterText = value;
+        //        this.machineCollection.View.Refresh();
+        //        RaisePropertyChanged("FilterText");
+        //    }
+        //}
+
+        //void machineCollection_Filter(object sender, FilterEventArgs e)
+        //{
+        //    if (string.IsNullOrEmpty(FilterText))
+        //    {
+        //        e.Accepted = true;
+        //        return;
+        //    }
+
+        //    vBlockData vMachine = e.Item as vBlockData;
+        //    if (vMachine.machineName.ToUpper().Contains(FilterText.ToUpper()))
+        //    {
+        //        e.Accepted = true;
+        //    }
+        //    else
+        //    {
+        //        e.Accepted = false;
+        //    }
+        //}
+
+
+        //public void RaisePropertyChanged(string propertyName)
+        //{
+        //    if (this.PropertyChanged != null)
+        //    {
+        //        this.PropertyChanged(this, new PropertyChangedEventArgs(propertyName));
+        //    }
+        //}
+
+    }
+    
+    
 }
